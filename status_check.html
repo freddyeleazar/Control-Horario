@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Application Status Check</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Violin Lessons Application - Status Check</h1>
+    
+    <div id="tests"></div>
+    
+    <script>
+    async function runTests() {
+        const testsDiv = document.getElementById('tests');
+        
+        // Test 1: API GET
+        try {
+            const response = await fetch('api/records.php');
+            const data = await response.json();
+            addTest('API GET Request', data.success ? 'SUCCESS' : 'FAILED', 
+                   `Records count: ${data.data ? data.data.length : 0}`);
+        } catch (error) {
+            addTest('API GET Request', 'ERROR', error.message);
+        }
+        
+        // Test 2: API POST
+        try {
+            const testRecord = {
+                date: '2025-06-05',
+                duration: '1:15',
+                notes: 'Status check test record'
+            };
+            
+            const response = await fetch('api/records.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(testRecord)
+            });
+            const data = await response.json();
+            addTest('API POST Request', data.success ? 'SUCCESS' : 'FAILED',
+                   `New record ID: ${data.data ? data.data.id : 'N/A'}`);
+        } catch (error) {
+            addTest('API POST Request', 'ERROR', error.message);
+        }
+        
+        // Test 3: Export
+        try {
+            const response = await fetch('api/backup.php?action=export');
+            addTest('Export API', response.ok ? 'SUCCESS' : 'FAILED',
+                   `Response status: ${response.status}`);
+        } catch (error) {
+            addTest('Export API', 'ERROR', error.message);
+        }
+        
+        // Test 4: Check main app files
+        const files = [
+            'index.php',
+            'css/styles.css', 
+            'js/app.js',
+            'js/record-manager.js'
+        ];
+        
+        for (const file of files) {
+            try {
+                const response = await fetch(file);
+                addTest(`File: ${file}`, response.ok ? 'SUCCESS' : 'FAILED',
+                       `Status: ${response.status}`);
+            } catch (error) {
+                addTest(`File: ${file}`, 'ERROR', error.message);
+            }
+        }
+        
+        // Test 5: Check final record count
+        try {
+            const response = await fetch('api/records.php');
+            const data = await response.json();
+            addTest('Final Record Count', 'INFO', 
+                   `Total records: ${data.data ? data.data.length : 0}`);
+        } catch (error) {
+            addTest('Final Record Count', 'ERROR', error.message);
+        }
+    }
+    
+    function addTest(name, status, details) {
+        const testsDiv = document.getElementById('tests');
+        const testDiv = document.createElement('div');
+        testDiv.className = `test ${status.toLowerCase() === 'success' ? 'success' : 'error'}`;
+        testDiv.innerHTML = `
+            <strong>${name}:</strong> ${status}<br>
+            <small>${details}</small>
+        `;
+        testsDiv.appendChild(testDiv);
+    }
+    
+    runTests();
+    </script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+/* Responsive Design */
+
+/* Tablet and small desktop */
+@media (max-width: 1024px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .main-content {
+        padding: 20px;
+    }
+    
+    .filters-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .records-table th,
+    .records-table td {
+        padding: 12px 8px;
+    }
+    
+    .notes-cell {
+        max-width: 250px;
+    }
+}
+
+/* Mobile landscape and portrait */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .app-title {
+        font-size: 1.5rem;
+    }
+    
+    .app-title i {
+        font-size: 1.7rem;
+    }
+    
+    .balance-info {
+        align-self: stretch;
+        text-align: center;
+    }
+    
+    .main-content {
+        padding: 15px;
+    }
+    
+    .filters-section {
+        padding: 15px;
+    }
+    
+    .filters-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-small {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+    
+    /* Table responsive */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .records-table {
+        min-width: 600px;
+    }
+    
+    .records-table th,
+    .records-table td {
+        padding: 10px 6px;
+        font-size: 0.85rem;
+    }
+    
+    .notes-cell {
+        max-width: 150px;
+    }
+    
+    .actions-cell .btn {
+        margin-right: 4px;
+        padding: 6px 8px;
+    }
+    
+    /* Pagination responsive */
+    .pagination-container {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    /* Modal responsive */
+    .modal-overlay {
+        padding: 10px;
+    }
+    
+    .modal {
+        max-width: none;
+        width: 100%;
+        margin: 0;
+        max-height: 95vh;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 20px 15px;
+        max-height: 50vh;
+    }
+    
+    .modal-footer {
+        padding: 15px;
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Form responsive */
+    .record-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .duration-input-container {
+        justify-content: center;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+    }
+    
+    .header {
+        padding: 12px;
+        border-radius: 6px;
+    }
+    
+    .app-title {
+        font-size: 1.3rem;
+    }
+    
+    .app-title i {
+        font-size: 1.5rem;
+    }
+    
+    .main-content {
+        padding: 12px;
+        border-radius: 6px;
+    }
+    
+    .filters-section {
+        padding: 12px;
+    }
+    
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        min-height: 40px;
+    }
+    
+    .btn-small {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+        min-height: 32px;
+    }
+    
+    .records-table {
+        min-width: 500px;
+    }
+    
+    .records-table th,
+    .records-table td {
+        padding: 8px 4px;
+        font-size: 0.8rem;
+    }
+    
+    .notes-cell {
+        max-width: 120px;
+    }
+    
+    .actions-cell .btn {
+        padding: 4px 6px;
+        margin-right: 2px;
+    }
+    
+    .actions-cell .btn i {
+        font-size: 0.7rem;
+    }
+    
+    /* Compact modal for very small screens */
+    .modal-overlay {
+        padding: 5px;
+    }
+    
+    .modal-header {
+        padding: 12px;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    .modal-body {
+        padding: 15px 12px;
+    }
+    
+    .modal-footer {
+        padding: 12px;
+    }
+    
+    .form-input {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .duration-input-container input {
+        width: 50px;
+        padding: 8px 6px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+    .modal {
+        max-height: 95vh;
+    }
+    
+    .modal-body {
+        max-height: 40vh;
+    }
+    
+    .header {
+        padding: 10px 15px;
+        margin-bottom: 15px;
+    }
+    
+    .main-content {
+        padding: 15px;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .records-table th,
+    .records-table td {
+        border-width: 0.5px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .action-bar,
+    .filters-section,
+    .pagination-container,
+    .actions-cell {
+        display: none !important;
+    }
+    
+    .header {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc;
+    }
+    
+    .main-content {
+        box-shadow: none !important;
+        padding: 0;
+    }
+    
+    .records-table th {
+        background: #f5f5f5 !important;
+        color: black !important;
+    }
+    
+    .records-table {
+        border: 1px solid #ccc;
+    }
+    
+    .notes-cell {
+        max-width: none;
+    }
+    
+    .notes-preview {
+        -webkit-line-clamp: unset;
+        overflow: visible;
+    }
+}
+
+/* Dark mode support (if user prefers) */
+@media (prefers-color-scheme: dark) {
+    /* These would be optional dark mode overrides */
+    /* Commented out for now, but can be implemented if needed */
+    /*
+    :root {
+        --background-color: #1a1a1a;
+        --surface-color: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --border-color: #404040;
+    }
+    */
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .modal {
+        animation: none;
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+    
+    .spinner {
+        animation: none;
+    }
+}
+
+/* Focus visible for better accessibility */
+@media (hover: none) {
+    .btn:hover {
+        transform: none;
+        box-shadow: var(--shadow);
+    }
+    
+    .btn:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Touch-friendly interactions */
+@media (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .btn-small {
+        min-height: 40px;
+        min-width: 40px;
+    }
+    
+    .modal-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .filter-input {
+        min-height: 44px;
+    }
+    
+    .form-input {
+        min-height: 44px;
+    }
+}
