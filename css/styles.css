@@ -77,21 +77,37 @@ body {
     border-radius: var(--border-radius);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.balance-info.balanced {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(75, 0, 130, 0.15));
+    border-color: rgba(138, 43, 226, 0.3);
+    color: #fff;
 }
 
 .balance-info.deficit {
-    background: rgba(220, 20, 60, 0.2);
-    border-color: rgba(220, 20, 60, 0.3);
+    background: linear-gradient(135deg, rgba(220, 20, 60, 0.2), rgba(255, 69, 0, 0.15));
+    border-color: rgba(220, 20, 60, 0.4);
+    color: #fff;
 }
 
 .balance-info.surplus {
-    background: rgba(34, 139, 34, 0.2);
-    border-color: rgba(34, 139, 34, 0.3);
+    background: linear-gradient(135deg, rgba(34, 139, 34, 0.2), rgba(50, 205, 50, 0.15));
+    border-color: rgba(34, 139, 34, 0.4);
+    color: #fff;
 }
 
 #balanceText {
     font-weight: 500;
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#balanceText i {
+    font-size: 1.2rem;
 }
 
 /* Main Content */
@@ -289,6 +305,7 @@ body {
 .notes-preview {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;

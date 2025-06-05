@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Balance Test - Current Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 15px; border-radius: 8px; }
+        .deficit { background: linear-gradient(135deg, rgba(220, 20, 60, 0.2), rgba(255, 69, 0, 0.15)); border: 1px solid rgba(220, 20, 60, 0.4); }
+        .surplus { background: linear-gradient(135deg, rgba(34, 139, 34, 0.2), rgba(50, 205, 50, 0.15)); border: 1px solid rgba(34, 139, 34, 0.4); }
+        .balanced { background: linear-gradient(135deg, rgba(138, 43, 226, 0.15), rgba(75, 0, 130, 0.15)); border: 1px solid rgba(138, 43, 226, 0.3); }
+    </style>
+</head>
+<body>
+    <h2>Balance Test - Current CSV Data</h2>
+    <div id="results"></div>
+    
+    <script>
+    async function loadAndTestBalance() {
+        try {
+            // Load records from API
+            const response = await fetch('api/records.php');
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error('Failed to load records');
+            }
+            
+            const records = data.data;
+            const resultsDiv = document.getElementById('results');
+            
+            // Calculate balance
+            let totalMinutes = 0;
+            const recordDetails = [];
+            
+            records.forEach(record => {
+                const parts = record.duration.split(':');
+                const hours = parseInt(parts[0]) || 0;
+                const minutes = parseInt(parts[1]) || 0;
+                const recordMinutes = (hours * 60) + minutes;
+                totalMinutes += recordMinutes;
+                recordDetails.push(`${record.date}: ${record.duration} (${recordMinutes} min)`);
+            });
+            
+            const targetMinutes = records.length * 60;
+            const difference = totalMinutes - targetMinutes;
+            
+            let balanceClass = '';
+            let balanceText = '';
+            let balanceIcon = '';
+            
+            if (difference === 0) {
+                balanceClass = 'balanced';
+                balanceText = 'Todo OK';
+                balanceIcon = '🕐';
+            } else if (difference > 0) {
+                balanceClass = 'surplus';
+                const diffHours = Math.floor(Math.abs(difference) / 60);
+                const diffMins = Math.abs(difference) % 60;
+                balanceText = `SOBRAN ${diffHours}:${diffMins.toString().padStart(2, '0')}`;
+                balanceIcon = '➕';
+            } else {
+                balanceClass = 'deficit';
+                const diffHours = Math.floor(Math.abs(difference) / 60);
+                const diffMins = Math.abs(difference) % 60;
+                balanceText = `FALTAN ${diffHours}:${diffMins.toString().padStart(2, '0')}`;
+                balanceIcon = '➖';
+            }
+            
+            resultsDiv.innerHTML = `
+                <div class="result">
+                    <h3>Datos Cargados de la API:</h3>
+                    <strong>Total de clases:</strong> ${records.length}<br>
+                    <strong>Detalles:</strong><br>
+                    ${recordDetails.map(detail => `• ${detail}`).join('<br>')}
+                </div>
+                
+                <div class="result">
+                    <h3>Cálculo del Balance:</h3>
+                    <strong>Tiempo total registrado:</strong> ${Math.floor(totalMinutes / 60)}:${(totalMinutes % 60).toString().padStart(2, '0')} (${totalMinutes} minutos)<br>
+                    <strong>Tiempo objetivo:</strong> ${Math.floor(targetMinutes / 60)}:00 (${targetMinutes} minutos)<br>
+                    <strong>Diferencia:</strong> ${difference} minutos
+                </div>
+                
+                <div class="result ${balanceClass}">
+                    <h3>Balance Final:</h3>
+                    <strong style="font-size: 1.2em;">${balanceIcon} ${balanceText}</strong>
+                </div>
+            `;
+            
+        } catch (error) {
+            document.getElementById('results').innerHTML = `
+                <div class="result" style="background: #f8d7da; border: 1px solid #f5c6cb;">
+                    <strong>Error:</strong> ${error.message}
+                </div>
+            `;
+        }
+    }
+    
+    loadAndTestBalance();
+    </script>
+</body>
+</html>

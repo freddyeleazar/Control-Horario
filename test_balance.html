@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Balance Calculation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h2>Balance Calculation Test</h2>
+    <div id="results"></div>
+    
+    <script>
+    // Mock data based on current CSV content
+    const testRecords = [
+        { id: 1, date: "2025-06-05", duration: "1:00", notes: "Test lesson - API working!" },
+        { id: 2, date: "2025-06-04", duration: "1:00", notes: "Scales and arpeggios practice" },
+        { id: 3, date: "2025-06-03", duration: "0:30", notes: "Etude practice - Wohlfahrt" },
+        { id: 4, date: "2025-06-06", duration: "1:00", notes: "Final test - Bach Partita practice" }
+    ];
+    
+    // Utils functions (copied from utils.js)
+    function parseDuration(duration) {
+        const parts = duration.split(':');
+        return {
+            hours: parseInt(parts[0]) || 0,
+            minutes: parseInt(parts[1]) || 0
+        };
+    }
+    
+    function durationToMinutes(hours, minutes) {
+        return (hours * 60) + minutes;
+    }
+    
+    function minutesToDuration(totalMinutes) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return { hours, minutes };
+    }
+    
+    function formatDuration(hours, minutes) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+    }
+    
+    // Test balance calculation
+    function testBalance() {
+        const resultsDiv = document.getElementById('results');
+        
+        // Calculate total minutes from records
+        let totalMinutes = 0;
+        testRecords.forEach(record => {
+            const { hours, minutes } = parseDuration(record.duration);
+            totalMinutes += durationToMinutes(hours, minutes);
+        });
+        
+        // Target minutes (1 hour per class)
+        const targetMinutes = testRecords.length * 60;
+        
+        // Calculate difference
+        const difference = totalMinutes - targetMinutes;
+        
+        // Results
+        const totalHours = Math.floor(totalMinutes / 60);
+        const remainingMinutes = totalMinutes % 60;
+        const targetHours = Math.floor(targetMinutes / 60);
+        
+        resultsDiv.innerHTML = `
+            <div class="test-result">
+                <strong>Records:</strong> ${testRecords.length} classes<br>
+                <strong>Durations:</strong> ${testRecords.map(r => r.duration).join(', ')}<br>
+                <strong>Total Time:</strong> ${formatDuration(totalHours, remainingMinutes)} (${totalMinutes} minutes)<br>
+                <strong>Target Time:</strong> ${targetHours}:00 (${targetMinutes} minutes)<br>
+                <strong>Difference:</strong> ${difference} minutes
+            </div>
+            <div class="test-result ${difference === 0 ? 'success' : 'error'}">
+                <strong>Balance Status:</strong> 
+                ${difference === 0 ? 
+                    '✅ Todo OK' : 
+                    difference > 0 ? 
+                        `✅ SOBRAN ${formatDuration(...Object.values(minutesToDuration(Math.abs(difference))))}` :
+                        `❌ FALTAN ${formatDuration(...Object.values(minutesToDuration(Math.abs(difference))))}`
+                }
+            </div>
+        `;
+    }
+    
+    testBalance();
+    </script>
+</body>
+</html>

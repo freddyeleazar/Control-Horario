@@ -48,19 +48,40 @@ function updateYearFilterOptions(records) {
 }
 
 function updateBalanceInfo(records) {
-    // Suma la duración de la última clase registrada (la más reciente)
     const balanceDiv = document.getElementById('balanceInfo');
     const balanceText = document.getElementById('balanceText');
+    
     if (!records.length) {
         balanceDiv.className = 'balance-info';
-        balanceText.textContent = 'Balance: En hora';
+        balanceText.innerHTML = '<i class="fas fa-clock"></i> Todo OK';
         return;
     }
-    const last = records[0];
-    const { hours, minutes } = Utils.parseDuration(last.duration);
-    const diff = Utils.calculateTimeDifference(hours, minutes);
-    balanceDiv.className = 'balance-info' + (diff.type === 'deficit' ? ' deficit' : diff.type === 'surplus' ? ' surplus' : '');
-    balanceText.textContent = diff.type === 'exact' ? 'Balance: En hora' : diff.text;
+
+    // Calcular el total de horas registradas
+    let totalMinutes = 0;
+    records.forEach(record => {
+        const { hours, minutes } = Utils.parseDuration(record.duration);
+        totalMinutes += Utils.durationToMinutes(hours, minutes);
+    });
+
+    // Calcular el objetivo (1 hora por clase)
+    const targetMinutes = records.length * 60;
+    
+    // Calcular la diferencia
+    const difference = totalMinutes - targetMinutes;
+    
+    if (difference === 0) {
+        balanceDiv.className = 'balance-info balanced';
+        balanceText.innerHTML = '<i class="fas fa-clock"></i> Todo OK';
+    } else if (difference > 0) {
+        const { hours: diffHours, minutes: diffMinutes } = Utils.minutesToDuration(Math.abs(difference));
+        balanceDiv.className = 'balance-info surplus';
+        balanceText.innerHTML = `<i class="fas fa-plus-circle"></i> SOBRAN ${Utils.formatDuration(diffHours, diffMinutes)}`;
+    } else {
+        const { hours: diffHours, minutes: diffMinutes } = Utils.minutesToDuration(Math.abs(difference));
+        balanceDiv.className = 'balance-info deficit';
+        balanceText.innerHTML = `<i class="fas fa-minus-circle"></i> FALTAN ${Utils.formatDuration(diffHours, diffMinutes)}`;
+    }
 }
 
 function setupEventListeners() {
