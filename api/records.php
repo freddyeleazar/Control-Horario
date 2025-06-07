@@ -121,21 +121,45 @@ class RecordsAPI {
         
         return $errors;
     }
-    
-    public function handleRequest() {
+      public function handleRequest() {
         $method = $_SERVER['REQUEST_METHOD'];
         $input = json_decode(file_get_contents('php://input'), true);
+        
+        // Get action from query parameter or POST data
+        $action = $_GET['action'] ?? $input['action'] ?? null;
         
         try {
             switch ($method) {
                 case 'GET':
-                    $this->getRecords();
+                    if ($action === 'get' || $action === null) {
+                        $this->getRecords();
+                    } else {
+                        $this->sendError('Acción no válida para GET', 400);
+                    }
                     break;
                     
                 case 'POST':
-                    $this->createRecord($input);
+                    switch ($action) {
+                        case 'create':
+                        case null: // Mantener compatibilidad con POST sin action
+                            $this->createRecord($input);
+                            break;
+                            
+                        case 'update':
+                            $this->updateRecord($input);
+                            break;
+                            
+                        case 'delete':
+                            $this->deleteRecord($input);
+                            break;
+                            
+                        default:
+                            $this->sendError('Acción no válida', 400);
+                            break;
+                    }
                     break;
                     
+                // Mantener compatibilidad con métodos antiguos para desarrollo local
                 case 'PUT':
                     $this->updateRecord($input);
                     break;

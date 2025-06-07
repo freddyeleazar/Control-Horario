@@ -3,23 +3,39 @@ const API_BASE_URL = 'api/records.php';
 const BACKUP_API_URL = 'api/backup.php';
 
 const RecordManager = (() => {
-    let records = [];
-
-    // API helper function
-    async function makeRequest(method, data = null) {
+    let records = [];    // API helper function
+    async function makeRequest(method, data = null, action = null) {
+        let url = API_BASE_URL;
+        
+        // For hosting compatibility, use POST with action parameter instead of PUT/DELETE
+        let requestMethod = method;
+        if (method === 'PUT' || method === 'DELETE') {
+            requestMethod = 'POST';
+            if (action === null) {
+                action = method === 'PUT' ? 'update' : 'delete';
+            }
+        }
+        
+        // Add action parameter to URL for GET requests or data for POST
+        if (action && requestMethod === 'GET') {
+            url += `?action=${action}`;
+        } else if (action && requestMethod === 'POST') {
+            data = { ...data, action: action };
+        }
+        
         const options = {
-            method: method,
+            method: requestMethod,
             headers: {
                 'Content-Type': 'application/json',
             }
         };
 
-        if (data && method !== 'GET') {
+        if (data && requestMethod !== 'GET') {
             options.body = JSON.stringify(data);
         }
 
         try {
-            const response = await fetch(API_BASE_URL, options);
+            const response = await fetch(url, options);
             const result = await response.json();
             
             if (!result.success) {
@@ -45,12 +61,10 @@ const RecordManager = (() => {
             records = Utils.getLocalStorage('violin_records', []);
             return records;
         }
-    }
-
-    // Add new record
+    }    // Add new record
     async function addRecord(record) {
         try {
-            const result = await makeRequest('POST', record);
+            const result = await makeRequest('POST', record, 'create');
             const newRecord = result.data;
             
             // Update local cache
@@ -62,13 +76,11 @@ const RecordManager = (() => {
             console.error('Error adding record:', error);
             throw error;
         }
-    }
-
-    // Update record by id
+    }    // Update record by id
     async function updateRecord(id, updated) {
         try {
             const updateData = { id, ...updated };
-            const result = await makeRequest('PUT', updateData);
+            const result = await makeRequest('POST', updateData, 'update');
             const updatedRecord = result.data;
             
             // Update local cache
@@ -83,12 +95,10 @@ const RecordManager = (() => {
             console.error('Error updating record:', error);
             throw error;
         }
-    }
-
-    // Delete record by id
+    }    // Delete record by id
     async function deleteRecord(id) {
         try {
-            await makeRequest('DELETE', { id });
+            await makeRequest('POST', { id }, 'delete');
             
             // Update local cache
             records = records.filter(r => r.id !== id);
