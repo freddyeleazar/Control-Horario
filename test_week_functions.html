@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Week Functions</title>
+</head>
+<body>
+    <h1>Prueba de Funciones de Semana</h1>
+    <div id="results"></div>
+
+    <script src="js/utils.js"></script>
+    <script>
+        function testWeekFunctions() {
+            const results = document.getElementById('results');
+            let output = '<h2>Resultados de Pruebas:</h2>';
+            
+            // Test current date
+            const today = new Date();
+            output += `<p><strong>Fecha actual:</strong> ${today.toLocaleDateString()}</p>`;
+            
+            // Test week start and end
+            const weekStart = Utils.getWeekStart(today);
+            const weekEnd = Utils.getWeekEnd(today);
+            output += `<p><strong>Inicio de semana:</strong> ${weekStart.toLocaleDateString()}</p>`;
+            output += `<p><strong>Fin de semana:</strong> ${weekEnd.toLocaleDateString()}</p>`;
+            
+            // Test week identifier
+            const weekId = Utils.getWeekIdentifier(today);
+            output += `<p><strong>ID de semana:</strong> ${weekId}</p>`;
+            
+            // Test with sample records
+            const sampleRecords = [
+                { id: 1, date: '2025-07-21', duration: '1:00', notes: 'Clase lunes' },
+                { id: 2, date: '2025-07-23', duration: '0:45', notes: 'Clase miércoles' },
+                { id: 3, date: '2025-07-25', duration: '1:15', notes: 'Clase viernes' },
+                { id: 4, date: '2025-07-14', duration: '1:00', notes: 'Semana pasada' },
+            ];
+            
+            output += '<h3>Registros de ejemplo:</h3>';
+            sampleRecords.forEach(record => {
+                output += `<p>ID: ${record.id}, Fecha: ${record.date}, Duración: ${record.duration}</p>`;
+            });
+            
+            // Test current week records
+            const currentWeekRecords = Utils.getCurrentWeekRecords(sampleRecords);
+            output += '<h3>Registros de la semana actual:</h3>';
+            currentWeekRecords.forEach(record => {
+                output += `<p>ID: ${record.id}, Fecha: ${record.date}, Duración: ${record.duration}</p>`;
+            });
+            
+            // Test week grouping
+            const weekGroups = Utils.groupRecordsByWeek(sampleRecords);
+            output += '<h3>Agrupación por semanas:</h3>';
+            Object.keys(weekGroups).forEach(weekId => {
+                output += `<p><strong>Semana ${weekId}:</strong> ${weekGroups[weekId].length} clases</p>`;
+                weekGroups[weekId].forEach(record => {
+                    output += `<p>&nbsp;&nbsp;- ${record.date}: ${record.duration}</p>`;
+                });
+            });
+            
+            results.innerHTML = output;
+        }
+        
+        // Run tests when page loads
+        window.onload = testWeekFunctions;
+    </script>
+</body>
+</html>

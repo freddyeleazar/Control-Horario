@@ -38,7 +38,8 @@ async function renderAll() {
     const filtered = FilterManager.applyFilters(allRecords);
     TableManager.resetPage();
     TableManager.renderTable(filtered);
-    updateBalanceInfo(filtered);
+    // Balance info always uses all records to show current week balance
+    updateBalanceInfo(allRecords);
 }
 
 function updateYearFilterOptions(records) {
@@ -51,36 +52,39 @@ function updateBalanceInfo(records) {
     const balanceDiv = document.getElementById('balanceInfo');
     const balanceText = document.getElementById('balanceText');
     
-    if (!records.length) {
+    // Get current week's records only
+    const currentWeekRecords = Utils.getCurrentWeekRecords(records);
+    
+    if (!currentWeekRecords.length) {
         balanceDiv.className = 'balance-info';
-        balanceText.innerHTML = '<i class="fas fa-clock"></i> Todo OK';
+        balanceText.innerHTML = '<i class="fas fa-clock"></i> Sin clases esta semana';
         return;
     }
 
-    // Calcular el total de horas registradas
+    // Calcular el total de horas registradas en la semana actual
     let totalMinutes = 0;
-    records.forEach(record => {
+    currentWeekRecords.forEach(record => {
         const { hours, minutes } = Utils.parseDuration(record.duration);
         totalMinutes += Utils.durationToMinutes(hours, minutes);
     });
 
-    // Calcular el objetivo (1 hora por clase)
-    const targetMinutes = records.length * 60;
+    // Calcular el objetivo (1 hora por clase en la semana actual)
+    const targetMinutes = currentWeekRecords.length * 60;
     
     // Calcular la diferencia
     const difference = totalMinutes - targetMinutes;
     
     if (difference === 0) {
         balanceDiv.className = 'balance-info balanced';
-        balanceText.innerHTML = '<i class="fas fa-clock"></i> Todo OK';
+        balanceText.innerHTML = '<i class="fas fa-clock"></i> Todo OK esta semana';
     } else if (difference > 0) {
         const { hours: diffHours, minutes: diffMinutes } = Utils.minutesToDuration(Math.abs(difference));
         balanceDiv.className = 'balance-info surplus';
-        balanceText.innerHTML = `<i class="fas fa-plus-circle"></i> SOBRAN ${Utils.formatDuration(diffHours, diffMinutes)}`;
+        balanceText.innerHTML = `<i class="fas fa-plus-circle"></i> SOBRAN ${Utils.formatDuration(diffHours, diffMinutes)} esta semana`;
     } else {
         const { hours: diffHours, minutes: diffMinutes } = Utils.minutesToDuration(Math.abs(difference));
         balanceDiv.className = 'balance-info deficit';
-        balanceText.innerHTML = `<i class="fas fa-minus-circle"></i> FALTAN ${Utils.formatDuration(diffHours, diffMinutes)}`;
+        balanceText.innerHTML = `<i class="fas fa-minus-circle"></i> FALTAN ${Utils.formatDuration(diffHours, diffMinutes)} esta semana`;
     }
 }
 

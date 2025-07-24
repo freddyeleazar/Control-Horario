@@ -181,6 +181,66 @@ class Utils {
         };
     }
 
+    // Get the start of the week (Monday) for a given date
+    static getWeekStart(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+        return new Date(d.setDate(diff));
+    }
+
+    // Get the end of the week (Sunday) for a given date
+    static getWeekEnd(date) {
+        const start = this.getWeekStart(date);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        return end;
+    }
+
+    // Check if two dates are in the same week
+    static areDatesInSameWeek(date1, date2) {
+        const week1Start = this.getWeekStart(date1);
+        const week2Start = this.getWeekStart(date2);
+        return week1Start.getTime() === week2Start.getTime();
+    }
+
+    // Get week identifier string (YYYY-WW format)
+    static getWeekIdentifier(date) {
+        const d = new Date(date);
+        const weekStart = this.getWeekStart(d);
+        const year = weekStart.getFullYear();
+        
+        // Calculate week number more accurately
+        const startOfYear = new Date(year, 0, 1);
+        const days = Math.floor((weekStart - startOfYear) / (24 * 60 * 60 * 1000));
+        const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+        
+        return `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+    }
+
+    // Group records by week
+    static groupRecordsByWeek(records) {
+        const weekGroups = {};
+        
+        records.forEach(record => {
+            const weekId = this.getWeekIdentifier(record.date);
+            if (!weekGroups[weekId]) {
+                weekGroups[weekId] = [];
+            }
+            weekGroups[weekId].push(record);
+        });
+        
+        return weekGroups;
+    }
+
+    // Get current week's records
+    static getCurrentWeekRecords(records) {
+        const today = new Date();
+        const currentWeekId = this.getWeekIdentifier(today);
+        const weekGroups = this.groupRecordsByWeek(records);
+        return weekGroups[currentWeekId] || [];
+    }
+
     // Get available years for filter
     static getAvailableYears(records) {
         const years = new Set();

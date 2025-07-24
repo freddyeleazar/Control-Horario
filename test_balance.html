@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Balance Semanal</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        button { padding: 10px 20px; margin: 5px; background: #007cba; color: white; border: none; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .result { margin: 10px 0; padding: 10px; background: white; border-left: 4px solid #007cba; }
+    </style>
+</head>
+<body>
+    <h1>Test de Balance Semanal</h1>
+    
+    <div class="test-section">
+        <h2>1. Agregar Datos de Prueba</h2>
+        <button onclick="addTestRecords()">Agregar Registros de la Semana Actual</button>
+        <div id="addResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Cargar y Mostrar Registros</h2>
+        <button onclick="loadAndShowRecords()">Cargar Registros</button>
+        <div id="loadResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Probar Cálculo de Balance</h2>
+        <button onclick="testBalanceCalculation()">Calcular Balance Semanal</button>
+        <div id="balanceResult"></div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/record-manager.js"></script>
+    <script>
+        async function addTestRecords() {
+            const resultDiv = document.getElementById('addResult');
+            resultDiv.innerHTML = '<p>Agregando registros...</p>';
+            
+            try {
+                // Get current week dates
+                const today = new Date();
+                const weekStart = Utils.getWeekStart(today);
+                
+                // Create test records for current week
+                const testRecords = [
+                    {
+                        date: Utils.getTodayString(), // Today
+                        duration: '1:00',
+                        notes: 'Clase de hoy - exacta'
+                    },
+                    {
+                        date: new Date(weekStart.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Tuesday
+                        duration: '0:45',
+                        notes: 'Clase corta - faltan 15 min'
+                    },
+                    {
+                        date: new Date(weekStart.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Thursday
+                        duration: '1:30',
+                        notes: 'Clase larga - sobran 30 min'
+                    }
+                ];
+                
+                let results = [];
+                for (const record of testRecords) {
+                    try {
+                        const result = await RecordManager.addRecord(record);
+                        results.push(`✓ Agregado: ${record.date} - ${record.duration}`);
+                    } catch (error) {
+                        results.push(`✗ Error: ${error.message}`);
+                    }
+                }
+                
+                resultDiv.innerHTML = '<div class="result">' + results.join('<br>') + '</div>';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result">Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function loadAndShowRecords() {
+            const resultDiv = document.getElementById('loadResult');
+            resultDiv.innerHTML = '<p>Cargando registros...</p>';
+            
+            try {
+                await RecordManager.loadRecords();
+                const allRecords = RecordManager.getRecords();
+                const currentWeekRecords = Utils.getCurrentWeekRecords(allRecords);
+                
+                let output = `<p><strong>Total de registros:</strong> ${allRecords.length}</p>`;
+                output += `<p><strong>Registros de esta semana:</strong> ${currentWeekRecords.length}</p>`;
+                
+                if (currentWeekRecords.length > 0) {
+                    output += '<p><strong>Detalles de la semana actual:</strong></p>';
+                    currentWeekRecords.forEach(record => {
+                        output += `<p>• ${record.date}: ${record.duration} - ${record.notes}</p>`;
+                    });
+                }
+                
+                resultDiv.innerHTML = '<div class="result">' + output + '</div>';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result">Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testBalanceCalculation() {
+            const resultDiv = document.getElementById('balanceResult');
+            resultDiv.innerHTML = '<p>Calculando balance...</p>';
+            
+            try {
+                await RecordManager.loadRecords();
+                const allRecords = RecordManager.getRecords();
+                const currentWeekRecords = Utils.getCurrentWeekRecords(allRecords);
+                
+                if (currentWeekRecords.length === 0) {
+                    resultDiv.innerHTML = '<div class="result">No hay clases en la semana actual</div>';
+                    return;
+                }
+                
+                // Calculate balance
+                let totalMinutes = 0;
+                currentWeekRecords.forEach(record => {
+                    const { hours, minutes } = Utils.parseDuration(record.duration);
+                    totalMinutes += Utils.durationToMinutes(hours, minutes);
+                });
+                
+                const targetMinutes = currentWeekRecords.length * 60;
+                const difference = totalMinutes - targetMinutes;
+                
+                let balanceText = '';
+                if (difference === 0) {
+                    balanceText = '✓ Todo OK esta semana';
+                } else if (difference > 0) {
+                    const { hours: diffHours, minutes: diffMinutes } = Utils.minutesToDuration(Math.abs(difference));
+                    balanceText = `⚠️ SOBRAN ${Utils.formatDuration(diffHours, diffMinutes)} esta semana`;
+                } else {
+                    const { hours: diffHours, minutes: diffMinutes } = Utils.minutesToDuration(Math.abs(difference));
+                    balanceText = `⚠️ FALTAN ${Utils.formatDuration(diffHours, diffMinutes)} esta semana`;
+                }
+                
+                let output = `<p><strong>Clases esta semana:</strong> ${currentWeekRecords.length}</p>`;
+                output += `<p><strong>Total horas registradas:</strong> ${Utils.formatDuration(Math.floor(totalMinutes / 60), totalMinutes % 60)}</p>`;
+                output += `<p><strong>Objetivo:</strong> ${Utils.formatDuration(Math.floor(targetMinutes / 60), targetMinutes % 60)}</p>`;
+                output += `<p><strong>Balance:</strong> ${balanceText}</p>`;
+                
+                resultDiv.innerHTML = '<div class="result">' + output + '</div>';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
