@@ -1,6 +1,12 @@
 id,date,duration,notes
-1,2025-06-03,1:00,"Escalas y arpegios"
-2,2025-06-05,0:30,"Repaso de partitura"
-3,2025-07-21,1:00,"Clase del lunes - exacta"
-4,2025-07-23,0:45,"Clase del miércoles - corta"
-5,2025-07-25,1:30,"Clase del viernes - larga"
+1,2025-06-04,1:00,
+2,2025-06-11,1:00,
+3,2025-06-01,0:30,
+4,2025-06-02,0:30,
+5,2025-06-18,0:30,"Clase de violin sin mucho estudio por equince de pie se corre lo demas para el dia sabado"
+6,2025-06-21,1:15,
+7,2025-06-27,1:15,"solo se vio laz ya que lidia no tenía el violín disponible en el último momento"
+8,2025-06-28,2:00,"clase de recuperacion/error en el programa ya que esta clase era la que se debia de una hora pero aun asi salia que debia una hora asi que se puso de dos horas la clase"
+9,2025-07-05,1:00,
+10,2025-07-11,1:00,
+11,2025-07-18,1:00,
