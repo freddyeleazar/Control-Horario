@@ -128,6 +128,15 @@ body {
     gap: 15px;
 }
 
+
+/* Saldo column styles */
+.records-table .saldo-cell {
+    font-weight: 600;
+    white-space: nowrap;
+}
+.records-table .saldo-balanced { color: #2f855a; } /* green */
+.records-table .saldo-surplus { color: #2b6cb0; }  /* blue */
+.records-table .saldo-deficit { color: #c53030; }  /* red */
 .action-buttons-group {
     display: flex;
     gap: 10px;

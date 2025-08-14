@@ -96,6 +96,7 @@
                         <tr>
                             <th>Fecha</th>
                             <th>Duración</th>
+                            <th>Saldo</th>
                             <th>Notas</th>
                             <th>Acciones</th>
                         </tr>

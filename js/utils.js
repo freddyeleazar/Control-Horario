@@ -241,6 +241,55 @@ class Utils {
         return weekGroups[currentWeekId] || [];
     }
 
+    // Compute running weekly balance up to each record (by date asc, per week)
+    // Returns a map: { [id]: { diffMinutes, type: 'balanced'|'surplus'|'deficit', text } }
+    static computeWeeklyRunningBalance(records) {
+        const result = {};
+        if (!Array.isArray(records) || records.length === 0) return result;
+
+        // Sort ascending by date (and by id for stable order when same date)
+        const sorted = [...records].sort((a, b) => {
+            const da = new Date(a.date).getTime();
+            const db = new Date(b.date).getTime();
+            if (da !== db) return da - db;
+            // numeric id tiebreaker if possible
+            const ida = typeof a.id === 'number' ? a.id : parseInt(a.id);
+            const idb = typeof b.id === 'number' ? b.id : parseInt(b.id);
+            if (!isNaN(ida) && !isNaN(idb)) return ida - idb;
+            return 0;
+        });
+
+        // State per week
+        const perWeek = {};
+
+        for (const r of sorted) {
+            const weekId = this.getWeekIdentifier(r.date);
+            if (!perWeek[weekId]) perWeek[weekId] = { count: 0, minutes: 0 };
+
+            const { hours, minutes } = this.parseDuration(r.duration || '0:00');
+            perWeek[weekId].count += 1;
+            perWeek[weekId].minutes += this.durationToMinutes(hours, minutes);
+
+            const target = perWeek[weekId].count * 60; // 1 hour per class
+            const diff = perWeek[weekId].minutes - target;
+            const { hours: dh, minutes: dm } = this.minutesToDuration(Math.abs(diff));
+
+            let type = 'balanced';
+            let text = 'OK';
+            if (diff > 0) {
+                type = 'surplus';
+                text = `SOBRAN ${this.formatDuration(dh, dm)}`;
+            } else if (diff < 0) {
+                type = 'deficit';
+                text = `FALTAN ${this.formatDuration(dh, dm)}`;
+            }
+
+            result[r.id] = { diffMinutes: diff, type, text };
+        }
+
+        return result;
+    }
+
     // Get available years for filter
     static getAvailableYears(records) {
         const years = new Set();

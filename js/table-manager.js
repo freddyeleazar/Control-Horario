@@ -13,14 +13,19 @@ const TableManager = (() => {
             updatePagination(0, 0);
             return;
         }
+        // Precompute weekly running balance for all records
+        const saldoById = Utils.computeWeeklyRunningBalance(records);
         const start = (currentPage - 1) * PAGE_SIZE;
         const end = start + PAGE_SIZE;
         const pageRecords = records.slice(start, end);
         for (const record of pageRecords) {
+            const saldo = saldoById[record.id] || { diffMinutes: 0, type: 'balanced', text: 'OK' };
+            const saldoClass = saldo.type === 'surplus' ? 'saldo-surplus' : (saldo.type === 'deficit' ? 'saldo-deficit' : 'saldo-balanced');
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="date-cell">${Utils.formatDate(record.date)}</td>
                 <td class="duration-cell">${record.duration}</td>
+                <td class="saldo-cell ${saldoClass}">${saldo.text}</td>
                 <td class="notes-cell">
                     <span class="notes-preview" title="${Utils.escapeHtml(record.notes || '')}">${Utils.truncateText(record.notes || '', 60)}</span>
                 </td>
