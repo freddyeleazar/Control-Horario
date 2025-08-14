@@ -181,12 +181,14 @@ class Utils {
         };
     }
 
-    // Get the start of the week (Monday) for a given date
+    // Get the start of the week (Monday) for a given date (ISO week)
     static getWeekStart(date) {
         const d = new Date(date);
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-        return new Date(d.setDate(diff));
+        // Convert to Monday=0..Sunday=6
+        const day = (d.getDay() + 6) % 7;
+        d.setDate(d.getDate() - day);
+        d.setHours(0, 0, 0, 0);
+        return d;
     }
 
     // Get the end of the week (Sunday) for a given date
@@ -204,18 +206,22 @@ class Utils {
         return week1Start.getTime() === week2Start.getTime();
     }
 
-    // Get week identifier string (YYYY-WW format)
+    // Get ISO week identifier string (YYYY-WW, Monday-based weeks)
     static getWeekIdentifier(date) {
-        const d = new Date(date);
-        const weekStart = this.getWeekStart(d);
-        const year = weekStart.getFullYear();
-        
-        // Calculate week number more accurately
-        const startOfYear = new Date(year, 0, 1);
-        const days = Math.floor((weekStart - startOfYear) / (24 * 60 * 60 * 1000));
-        const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-        
-        return `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+        const src = new Date(date);
+        // Use UTC to avoid TZ/DST issues for week computations
+        const d = new Date(Date.UTC(src.getFullYear(), src.getMonth(), src.getDate()));
+        // Get day number with Monday=1..Sunday=7
+        let dayNum = d.getUTCDay();
+        if (dayNum === 0) dayNum = 7;
+        // Move to Thursday of the current ISO week
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        // Week-year is the year of that Thursday
+        const weekYear = d.getUTCFullYear();
+        // Get first day of week-year (Jan 1) and compute week number
+        const yearStart = new Date(Date.UTC(weekYear, 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return `${weekYear}-W${String(weekNo).padStart(2, '0')}`;
     }
 
     // Group records by week
