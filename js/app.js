@@ -51,13 +51,34 @@ function updateYearFilterOptions(records) {
 function updateBalanceInfo(records) {
     const balanceDiv = document.getElementById('balanceInfo');
     const balanceText = document.getElementById('balanceText');
+    const weekRangeText = document.getElementById('weekRangeText');
     
     // Get current week's records only
     const currentWeekRecords = Utils.getCurrentWeekRecords(records);
     
+    // Show current week range always
+    const today = new Date();
+    const weekStart = Utils.getWeekStart(today);
+    const weekEnd = Utils.getWeekEnd(today);
+    const pad = (n) => String(n).padStart(2, '0');
+    const fmt = (d) => `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    if (weekRangeText) weekRangeText.textContent = `Semana: ${fmt(weekStart)} – ${fmt(weekEnd)}`;
+
+    // Compute carry from previous weeks
+    const currentWeekId = Utils.getWeekIdentifier(today);
+    const carry = Utils.getCarryBeforeWeek(records, currentWeekId);
+
     if (!currentWeekRecords.length) {
         balanceDiv.className = 'balance-info';
-        balanceText.innerHTML = '<i class="fas fa-clock"></i> Sin clases esta semana';
+        if (carry === 0) {
+            balanceText.innerHTML = '<i class="fas fa-clock"></i> Sin clases esta semana';
+        } else if (carry > 0) {
+            const { hours, minutes } = Utils.minutesToDuration(carry);
+            balanceText.innerHTML = `<i class="fas fa-plus-circle"></i> Arrastre: SOBRAN ${Utils.formatDuration(hours, minutes)}`;
+        } else {
+            const { hours, minutes } = Utils.minutesToDuration(Math.abs(carry));
+            balanceText.innerHTML = `<i class="fas fa-minus-circle"></i> Arrastre: FALTAN ${Utils.formatDuration(hours, minutes)}`;
+        }
         return;
     }
 
@@ -68,11 +89,12 @@ function updateBalanceInfo(records) {
         totalMinutes += Utils.durationToMinutes(hours, minutes);
     });
 
-    // Calcular el objetivo (1 hora por clase en la semana actual)
-    const targetMinutes = currentWeekRecords.length * 60;
+    // Objetivo semanal fijo: 60 minutos por semana (independiente del número de clases)
+    const targetMinutes = 60;
     
     // Calcular la diferencia
-    const difference = totalMinutes - targetMinutes;
+    // Apply carry-over to this week's balance
+    const difference = carry + (totalMinutes - targetMinutes);
     
     if (difference === 0) {
         balanceDiv.className = 'balance-info balanced';

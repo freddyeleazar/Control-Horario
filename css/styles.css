@@ -78,6 +78,11 @@ body {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    .balance-info .week-range-text {
+        font-size: 0.85rem;
+        color: #8a5a1d;
+        margin-left: 8px;
+    }
 }
 
 .balance-info.balanced {

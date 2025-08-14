@@ -247,6 +247,42 @@ class Utils {
         return weekGroups[currentWeekId] || [];
     }
 
+    // Get cumulative carry (surplus/deficit) before a given ISO week
+    // carry is the sum over past weeks of (minutesInWeek - 60)
+    static getCarryBeforeWeek(records, targetWeekId) {
+        if (!Array.isArray(records) || records.length === 0) return 0;
+        const sorted = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const WEEK_TARGET = 60;
+        let carry = 0;
+        let currentWeekId = null;
+        let minutesThisWeek = 0;
+
+        for (const r of sorted) {
+            const wId = this.getWeekIdentifier(r.date);
+            if (currentWeekId && wId !== currentWeekId) {
+                // finalize previous week
+                carry += (minutesThisWeek - WEEK_TARGET);
+                minutesThisWeek = 0;
+                if (currentWeekId === targetWeekId) {
+                    // If the completed week equals target, stop before accumulating it
+                    break;
+                }
+            }
+            if (currentWeekId !== wId) currentWeekId = wId;
+            if (wId === targetWeekId) {
+                // don't include current week minutes in carry-before
+                continue;
+            }
+            const { hours, minutes } = this.parseDuration(r.duration || '0:00');
+            minutesThisWeek += this.durationToMinutes(hours, minutes);
+        }
+        // finalize last week if it's strictly before target
+        if (currentWeekId && currentWeekId !== targetWeekId) {
+            carry += (minutesThisWeek - WEEK_TARGET);
+        }
+        return carry;
+    }
+
     // Compute running weekly balance up to each record (by date asc, per week)
     // Returns a map: { [id]: { diffMinutes, type: 'balanced'|'surplus'|'deficit', text } }
     static computeWeeklyRunningBalance(records) {
@@ -265,19 +301,27 @@ class Utils {
             return 0;
         });
 
-        // State per week
-        const perWeek = {};
+        const WEEK_TARGET = 60; // minutes per week
+        let carryFromPreviousWeeks = 0; // can be negative (deficit) or positive (surplus)
+        let currentWeekId = null;
+        let minutesThisWeek = 0;
 
         for (const r of sorted) {
             const weekId = this.getWeekIdentifier(r.date);
-            if (!perWeek[weekId]) perWeek[weekId] = { count: 0, minutes: 0 };
+            // New week encountered: finalize previous week and update carry
+            if (currentWeekId !== null && weekId !== currentWeekId) {
+                carryFromPreviousWeeks += (minutesThisWeek - WEEK_TARGET);
+                minutesThisWeek = 0;
+            }
+            if (currentWeekId !== weekId) {
+                currentWeekId = weekId;
+            }
 
             const { hours, minutes } = this.parseDuration(r.duration || '0:00');
-            perWeek[weekId].count += 1;
-            perWeek[weekId].minutes += this.durationToMinutes(hours, minutes);
+            minutesThisWeek += this.durationToMinutes(hours, minutes);
 
-            const target = perWeek[weekId].count * 60; // 1 hour per class
-            const diff = perWeek[weekId].minutes - target;
+            // Balance up to this record, applying carryover firstly
+            const diff = carryFromPreviousWeeks + (minutesThisWeek - WEEK_TARGET);
             const { hours: dh, minutes: dm } = this.minutesToDuration(Math.abs(diff));
 
             let type = 'balanced';

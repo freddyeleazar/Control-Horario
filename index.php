@@ -21,6 +21,7 @@
                 </h1>
                 <div class="balance-info" id="balanceInfo">
                     <span id="balanceText">Balance: En hora</span>
+                    <div id="weekRangeText" class="week-range-text"></div>
                 </div>
             </div>
         </header>

@@ -13,8 +13,9 @@ const TableManager = (() => {
             updatePagination(0, 0);
             return;
         }
-        // Precompute weekly running balance for all records
-        const saldoById = Utils.computeWeeklyRunningBalance(records);
+    // Precompute weekly running balance using ALL records (not just filtered)
+    const allRecords = (typeof RecordManager !== 'undefined' && RecordManager.getRecords) ? RecordManager.getRecords() : records;
+    const saldoById = Utils.computeWeeklyRunningBalance(allRecords);
         const start = (currentPage - 1) * PAGE_SIZE;
         const end = start + PAGE_SIZE;
         const pageRecords = records.slice(start, end);
